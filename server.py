@@ -5,7 +5,6 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from databases import Database
 from typing import List
-import sqlalchemy
 from sqlalchemy import create_engine, MetaData, Table, Column, Float, String
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, RedirectResponse
