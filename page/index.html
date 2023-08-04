@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Register</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+        function register() {
+            fetch('/register/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: document.getElementById('register-username').value,
+                    password: document.getElementById('register-password').value
+                })
+            })
+                .then(response => response.json())
+                .then(data => console.log(data));
+        }
+
+        function login() {
+    const formData = new URLSearchParams();
+    formData.append('username', document.getElementById('login-username').value);
+    formData.append('password', document.getElementById('login-password').value);
+
+    fetch('/token/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.redirect_url) {
+            // Redirect to the URL provided by the server
+            window.location.href = data.redirect_url;
+        } else {
+            // Display error message on the page
+            document.getElementById('login-error').innerText = data.detail || 'An unexpected error occurred';
+            document.getElementById('login-error').style.display = 'block';
+        }
+    });
+}
+
+
+    </script>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Login Form -->
+            <div class="col-md-6">
+                <h3>Login</h3>
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" class="form-control" id="login-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" class="form-control" id="login-password" required>
+                </div>
+                <button onclick="login()" class="btn btn-primary">Login</button>
+                <div id="login-error" class="alert alert-danger" style="display: none;"></div>
+            </div>
+
+            <!-- Registration Form -->
+            <div class="col-md-6">
+                <h3>Register</h3>
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" class="form-control" id="register-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" class="form-control" id="register-password" required>
+                </div>
+                <button onclick="register()" class="btn btn-success">Register</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
