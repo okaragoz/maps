@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Locations Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+</head>
+<body>
+    <button onclick="addNewMarker()">Add New Marker</button>
+    <div id="map" style="height: 600px;"></div>
+    <button onclick="logout()" class="btn btn-danger">Logout</button>
+
+    <script>
+        var map = L.map('map').setView([0, 0], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        var markers = [];
+
+        // Load locations from the server
+        axios.get('/location/')
+            .then(function (response) {
+                response.data.forEach(function(location, index) {
+                    var marker = L.marker([location.latitude, location.longitude])
+                        .addTo(map)
+                        .bindPopup(location.name + '<br><button onclick="deleteLocation(' + index + ')">Delete</button>');
+                    markers.push(marker);
+                });
+            });
+
+        function addNewMarker() {
+            function onMapClick(e) {
+                var name = prompt("Please enter the location name:");
+                var location = { name: name, latitude: e.latlng.lat, longitude: e.latlng.lng };
+
+                axios.post('/location/', location).then(function () {
+                    var marker = L.marker([location.latitude, location.longitude])
+                        .addTo(map)
+                        .bindPopup(location.name + '<br><button onclick="deleteLocation(' + markers.length + ')">Delete</button>');
+                    markers.push(marker);
+                });
+                map.off('click', onMapClick);
+            }
+
+            map.on('click', onMapClick);
+        }
+
+        function deleteLocation(index) {
+            axios.delete('/location/' + index).then(function () {
+                map.removeLayer(markers[index]);
+            });
+        }
+
+        // You can add more CRUD operations here, such as updating existing markers
+    </script>
+    <script>function logout() {
+        fetch('/logout/', {
+            method: 'POST',
+        })
+        .then(response => {
+            if (response.redirected) {
+                // Redirect to the URL provided by the server
+                window.location.href = response.url;
+            } else {
+                // Handle error, show message, etc.
+                console.log('Logout failed');
+            }
+        });
+    }
+    </script>
+</body>
+</html>
